@@ -1,0 +1,34 @@
+#include <Servo.h>
+
+// Pin configuration
+const int gasSensorPin = A0;   // MQ-2 analog pin
+const int buzzerPin = 8;       // Buzzer connected to D8
+const int servoPin = 9;        // Servo signal pin
+
+const int gasThreshold = 300;  // Threshold value (adjustable based on calibration)
+
+Servo regulator;
+
+void setup() {
+  Serial.begin(9600);                // Initialize serial monitor
+  pinMode(buzzerPin, OUTPUT);       // Buzzer pin as output
+  regulator.attach(servoPin);       // Attach servo to pin 9
+  regulator.write(0);               // Default state: valve open (0°)
+}
+
+void loop() {
+  int gasLevel = analogRead(gasSensorPin);  // Read gas sensor value
+
+  Serial.print("Gas Level: ");
+  Serial.println(gasLevel);
+
+  if (gasLevel > gasThreshold) {
+  digitalWrite(buzzerPin, HIGH);     // Activate buzzer
+  regulator.writeMicroseconds(2400); // Max torque (rotate to approx. 90°)
+} else {
+  digitalWrite(buzzerPin, LOW);      // Turn off buzzer
+  regulator.writeMicroseconds(500);  // Full reset (rotate to approx. 0°)
+}
+
+delay(100);  // Faster response (reduced delay)
+
